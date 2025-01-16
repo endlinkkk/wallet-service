@@ -1,14 +1,26 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import String, DateTime, ForeignKey, Numeric, Enum
-
 from domain.entities.wallets import OperationType
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    Numeric,
+    String,
+)
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 
 class Base(DeclarativeBase):
     pass
+
 
 class WalletModel(Base):
     __tablename__ = "wallets"
@@ -17,11 +29,15 @@ class WalletModel(Base):
     balance: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now, onupdate=datetime.now
+        DateTime,
+        default=datetime.now,
+        onupdate=datetime.now,
     )
 
     transactions: Mapped[list["TransactionModel"]] = relationship(
-        "TransactionModel", back_populates="wallet", cascade="all, delete-orphan"
+        "TransactionModel",
+        back_populates="wallet",
+        cascade="all, delete-orphan",
     )
 
 
@@ -35,6 +51,8 @@ class TransactionModel(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
-
     wallet: Mapped["WalletModel"] = relationship("WalletModel", back_populates="transactions")
 
+    __table_args__ = (
+        Index("ix_transactions_wallet_oid", "wallet_oid"),
+    )

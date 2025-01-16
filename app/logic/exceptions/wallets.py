@@ -8,7 +8,7 @@ class WalletNotFoundException(LogicException):
     @property
     def message(self):
         return "Wallet not found"
-    
+
 
 @dataclass
 class NotEnoughFundsException(LogicException):

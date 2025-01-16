@@ -1,15 +1,17 @@
-from abc import ABC, abstractmethod
+from abc import (
+    ABC,
+    abstractmethod,
+)
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import AsyncGenerator
 
 from application.api.filters import PaginationIn
 from domain.entities.wallets import Transaction as TransactionEntity
-
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from infra.repositories.transactions.base import BaseTransactionRepository
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
+
 from logic.services.wallets import BaseWalletManagementService
 
 
@@ -42,10 +44,8 @@ class TransactionService(BaseTransactionService):
         finally:
             await session.close()
 
-    
     async def create_transaction(self, transaction: TransactionEntity) -> TransactionEntity:
         async with self.get_session() as session:
-           
             await self.wallet_manager_service._has_sufficient_funds(transaction=transaction, session=session)
 
             saved_transaction = await self.transaction_repository.add(transaction=transaction, session=session)
@@ -53,12 +53,14 @@ class TransactionService(BaseTransactionService):
             await self.wallet_manager_service._update_wallet_amount(transaction=transaction, session=session)
 
         return saved_transaction
-    
+
     async def get_transactions_list(self, wallet_oid: str, pagination: PaginationIn):
         async with self.get_session() as session:
             transactions = await self.transaction_repository.get_all(
-                session=session, limit=pagination.limit, offset=pagination.offset, wallet_oid=wallet_oid
+                session=session,
+                limit=pagination.limit,
+                offset=pagination.offset,
+                wallet_oid=wallet_oid,
             )
 
         return transactions
-    

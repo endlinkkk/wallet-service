@@ -8,4 +8,3 @@ class LogicException(ApplicationException):
     @property
     def message(self):
         return "There was an error processing the request"
-

@@ -1,4 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import (
+    ABC,
+    abstractmethod,
+)
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -15,4 +18,3 @@ class BaseWalletRepository(ABC):
 
     @abstractmethod
     async def add(self, wallet: WalletEntity) -> WalletEntity: ...
-

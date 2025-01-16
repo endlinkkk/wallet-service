@@ -1,9 +1,12 @@
-from dataclasses import dataclass, field
+from dataclasses import (
+    dataclass,
+    field,
+)
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from uuid import uuid4
 
-from datetime import datetime
 
 @dataclass
 class BaseEntity:
@@ -12,7 +15,6 @@ class BaseEntity:
         kw_only=True,
     )
     created_at: datetime = field(default_factory=datetime.now, kw_only=True)
-    
 
 
 class OperationType(Enum):
@@ -24,6 +26,7 @@ class OperationType(Enum):
 class Wallet(BaseEntity):
     balance: Decimal = field(kw_only=True, default=0)
     updated_at: datetime | None = field(default=None)
+
 
 @dataclass
 class Transaction(BaseEntity):

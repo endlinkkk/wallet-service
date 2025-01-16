@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
-
-
 from domain.entities.wallets import Transaction as TransactionEntity
+
 from logic.services.transactions import BaseTransactionService
 from logic.use_cases.base import BaseUseCase
 from logic.validators.transactions import BaseTransactionValidatorService

@@ -8,6 +8,3 @@ class TransactionNotFoundException(LogicException):
     @property
     def message(self):
         return "Task not found"
-    
-
-

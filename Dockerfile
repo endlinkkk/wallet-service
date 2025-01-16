@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-ADD pyproject.toml /app
+COPY pyproject.toml /app
 
 RUN pip install --upgrade pip
 RUN pip install poetry

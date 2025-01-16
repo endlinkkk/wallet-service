@@ -1,6 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import (
+    ABC,
+    abstractmethod,
+)
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from domain.entities.wallets import Transaction as TransactionEntity
 
@@ -12,4 +15,3 @@ class BaseTransactionRepository(ABC):
 
     @abstractmethod
     async def get_all(self, wallet_oid: str, limit: int = 20, offset: int = 0) -> Iterable[TransactionEntity]: ...
-
