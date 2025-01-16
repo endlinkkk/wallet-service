@@ -16,7 +16,7 @@ from logic.use_cases.wallets.create import CreateWalletUseCase
 from logic.use_cases.wallets.get import GetWalletUseCase
 
 router = APIRouter(
-    tags=["Wallet"],
+    tags=["Wallet V1"],
 )
 
 
