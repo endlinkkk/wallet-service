@@ -7,4 +7,4 @@ from logic.exceptions.base import LogicException
 class TransactionNotFoundException(LogicException):
     @property
     def message(self):
-        return "Task not found"
+        return "Transaction not found"

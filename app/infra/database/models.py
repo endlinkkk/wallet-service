@@ -53,6 +53,4 @@ class TransactionModel(Base):
 
     wallet: Mapped["WalletModel"] = relationship("WalletModel", back_populates="transactions")
 
-    __table_args__ = (
-        Index("ix_transactions_wallet_oid", "wallet_oid"),
-    )
+    __table_args__ = (Index("ix_transactions_wallet_oid", "wallet_oid"),)

@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from application.api.filters import PaginationIn
 from application.api.schemas import ErrorSchema
 from application.api.wallets.v1.schemas import (
@@ -38,17 +40,17 @@ router = APIRouter(
 async def create_transaction_handler(
     wallet_uuid: str,
     schema: InTransactionSchema,
-    container: Container = Depends(init_container),  # noqa: B008
+    container: Annotated[Container, Depends(init_container)],
 ) -> OutTransactionSchema:
     use_case: CreateTransactionUseCase = container.resolve(CreateTransactionUseCase)
 
     try:
         transaction = await use_case.execute(transaction=schema.to_entity(wallet_oid=wallet_uuid))
     except ApplicationException as exception:
-        raise HTTPException(  # noqa: B904
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"error": exception.message},
-        )
+        ) from exception
 
     return OutTransactionSchema.from_entity(transaction=transaction)
 
@@ -64,17 +66,17 @@ async def create_transaction_handler(
 )
 async def create_wallet_handler(
     schema: InWalletSchema,
-    container: Container = Depends(init_container),  # noqa: B008
+    container: Annotated[Container, Depends(init_container)],
 ) -> OutWalletSchema:
     use_case: CreateWalletUseCase = container.resolve(CreateWalletUseCase)
 
     try:
         wallet = await use_case.execute(wallet=schema.to_entity())
     except ApplicationException as exception:
-        raise HTTPException(  # noqa: B904
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"error": exception.message},
-        )
+        ) from exception
 
     return OutWalletSchema.from_entity(wallet=wallet)
 
@@ -88,16 +90,18 @@ async def create_wallet_handler(
         status.HTTP_400_BAD_REQUEST: {"model": ErrorSchema},
     },
 )
-async def get_wallet_handler(wallet_uuid: str, container: Container = Depends(init_container)) -> OutWalletSchema:  # noqa: B008
+async def get_wallet_handler(
+    wallet_uuid: str, container: Annotated[Container, Depends(init_container)]
+) -> OutWalletSchema:
     use_case: GetWalletUseCase = container.resolve(GetWalletUseCase)
 
     try:
         wallet = await use_case.execute(wallet_oid=wallet_uuid)
     except ApplicationException as exception:
-        raise HTTPException(  # noqa: B904
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"error": exception.message},
-        )
+        ) from exception
     return OutWalletSchema.from_entity(wallet=wallet)
 
 
@@ -112,18 +116,20 @@ async def get_wallet_handler(wallet_uuid: str, container: Container = Depends(in
 )
 async def get_transactions_handler(
     wallet_uuid: str,
-    pagination_in: PaginationIn = Depends(),  # noqa: B008
-    container: Container = Depends(init_container),  # noqa: B008
+    pagination_in: Annotated[PaginationIn, Depends()],
+    container: Annotated[Container, Depends(init_container)],
 ) -> GetTransactionsQueryResponseSchema:
     use_case: GetTransactionsUseCase = container.resolve(GetTransactionsUseCase)
 
     try:
         transactions = await use_case.execute(wallet_oid=wallet_uuid, pagination=pagination_in)
     except ApplicationException as exception:
-        raise HTTPException(  # noqa: B904
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"error": exception.message},
-        )
+            detail={
+                "error": exception.message,
+            },
+        ) from exception
 
     return GetTransactionsQueryResponseSchema(
         count=len(transactions),

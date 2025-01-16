@@ -12,7 +12,7 @@ from domain.entities.wallets import (
 )
 from domain.exceptions import (
     InvalidOperationTypeException,
-    TransactionAmountNegativeМalueException,
+    TransactionAmountNegativeValueException,
 )
 
 
@@ -29,7 +29,7 @@ class BaseTransactionValidatorService(ABC):
 class TransactionAmountValidatorService(BaseTransactionValidatorService):
     def validate(self, transaction: TransactionEntity):
         if transaction.amount < 0:
-            raise TransactionAmountNegativeМalueException()
+            raise TransactionAmountNegativeValueException()
 
 
 @dataclass

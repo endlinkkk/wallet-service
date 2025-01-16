@@ -18,7 +18,7 @@ class InvalidOperationTypeException(ApplicationException):
 
 
 @dataclass
-class TransactionAmountNegativeМalueException(ApplicationException):
+class TransactionAmountNegativeValueException(ApplicationException):
     @property
     def message(self):
         return "Invalid transaction amount"
