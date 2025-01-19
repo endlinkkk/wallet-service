@@ -1,5 +1,14 @@
 from typing import Annotated
 
+from fastapi import (
+    Depends,
+    HTTPException,
+    status,
+)
+from fastapi.routing import APIRouter
+
+from punq import Container
+
 from application.api.filters import PaginationIn
 from application.api.schemas import ErrorSchema
 from application.api.wallets.v1.schemas import (
@@ -10,18 +19,12 @@ from application.api.wallets.v1.schemas import (
     OutWalletSchema,
 )
 from domain.exceptions import ApplicationException
-from fastapi import (
-    Depends,
-    HTTPException,
-    status,
-)
-from fastapi.routing import APIRouter
 from logic.initial_container import init_container
 from logic.use_cases.transactions.create import CreateTransactionUseCase
 from logic.use_cases.transactions.get import GetTransactionsUseCase
 from logic.use_cases.wallets.create import CreateWalletUseCase
 from logic.use_cases.wallets.get import GetWalletUseCase
-from punq import Container
+
 
 router = APIRouter(
     tags=["Wallet V1"],
@@ -91,7 +94,8 @@ async def create_wallet_handler(
     },
 )
 async def get_wallet_handler(
-    wallet_uuid: str, container: Annotated[Container, Depends(init_container)]
+    wallet_uuid: str,
+    container: Annotated[Container, Depends(init_container)],
 ) -> OutWalletSchema:
     use_case: GetWalletUseCase = container.resolve(GetWalletUseCase)
 

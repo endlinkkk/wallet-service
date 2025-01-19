@@ -1,9 +1,11 @@
-from dataclasses import dataclass, field
+from dataclasses import (
+    dataclass,
+    field,
+)
 from datetime import datetime
 from decimal import Decimal
 
 from domain.entities.wallets import Wallet as WalletEntity
-
 from infra.repositories.wallets.base import BaseWalletRepository
 
 

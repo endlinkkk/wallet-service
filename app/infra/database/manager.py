@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
     AsyncSession,
     create_async_engine,
 )
-from sqlalchemy.orm import sessionmaker
 
 from infra.database.models import Base
 
@@ -10,10 +10,10 @@ from infra.database.models import Base
 class DatabaseManager:
     def __init__(self, database_url: str):
         self.engine = create_async_engine(database_url, echo=True)
-        self.SessionLocal = sessionmaker(
+        self.SessionLocal = async_sessionmaker(
             bind=self.engine,
             class_=AsyncSession,
-            expire_on_commit=False,
+            expire_on_commit=True,
         )
 
     async def init_models(self):

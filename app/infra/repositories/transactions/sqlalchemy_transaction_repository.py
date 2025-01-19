@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from domain.entities.wallets import Transaction as TransactionEntity
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from domain.entities.wallets import Transaction as TransactionEntity
 from infra.database.models import TransactionModel
 from infra.repositories.transactions.base import BaseTransactionRepository
 
@@ -29,10 +29,14 @@ class SQLAlchemyTransactionRepository(BaseTransactionRepository):
         )
 
     async def get_all(
-        self, wallet_oid: str, session: AsyncSession, limit: int = 20, offset: int = 0
+        self,
+        wallet_oid: str,
+        session: AsyncSession,
+        limit: int = 20,
+        offset: int = 0,
     ) -> list[TransactionEntity]:
         result = await session.execute(
-            select(TransactionModel).where(TransactionModel.wallet_oid == wallet_oid).offset(offset).limit(limit)
+            select(TransactionModel).where(TransactionModel.wallet_oid == wallet_oid).offset(offset).limit(limit),
         )
 
         transactions_models = result.scalars().all()

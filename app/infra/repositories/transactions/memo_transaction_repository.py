@@ -1,8 +1,10 @@
-from dataclasses import dataclass, field
+from dataclasses import (
+    dataclass,
+    field,
+)
 from datetime import datetime
 
 from domain.entities.wallets import Transaction as TransactionEntity
-
 from infra.repositories.transactions.base import BaseTransactionRepository
 
 

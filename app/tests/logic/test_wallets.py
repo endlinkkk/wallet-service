@@ -1,9 +1,15 @@
 import pytest
+
 from application.api.filters import PaginationIn
-from domain.entities.wallets import OperationType
-from domain.entities.wallets import Transaction as TransactionEntity
-from domain.entities.wallets import Wallet as WalletEntity
-from logic.exceptions.wallets import NotEnoughFundsException, WalletNotFoundException
+from domain.entities.wallets import (
+    OperationType,
+    Transaction as TransactionEntity,
+    Wallet as WalletEntity,
+)
+from logic.exceptions.wallets import (
+    NotEnoughFundsException,
+    WalletNotFoundException,
+)
 from logic.services.transactions import TransactionService
 
 

@@ -1,6 +1,10 @@
-import pytest
-from fastapi import FastAPI, status
+from fastapi import (
+    FastAPI,
+    status,
+)
 from fastapi.testclient import TestClient
+
+import pytest
 from httpx import Response
 
 

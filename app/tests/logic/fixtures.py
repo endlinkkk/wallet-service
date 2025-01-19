@@ -1,12 +1,19 @@
 import pytest_asyncio
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    create_async_engine,
+)
+from sqlalchemy.orm import sessionmaker
+
 from domain.entities.wallets import Wallet as WalletEntity
 from infra.database.models import Base
 from infra.repositories.transactions.sqlalchemy_transaction_repository import SQLAlchemyTransactionRepository
 from infra.repositories.wallets.sqlalchemy_wallet_repository import SQLAlchemyWalletRepository
 from logic.services.transactions import TransactionService
-from logic.services.wallets import WalletManagementService, WalletService
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from logic.services.wallets import (
+    WalletManagementService,
+    WalletService,
+)
 
 
 class DatabaseManager:
@@ -39,7 +46,8 @@ async def wallet_manager_service() -> WalletManagementService:
 
 @pytest_asyncio.fixture(scope="session")
 async def transaction_service(
-    database_manager: DatabaseManager, wallet_manager_service: WalletManagementService
+    database_manager: DatabaseManager,
+    wallet_manager_service: WalletManagementService,
 ) -> TransactionService:
     return TransactionService(
         session_factory=database_manager.SessionLocal,

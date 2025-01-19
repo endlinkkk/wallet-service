@@ -20,7 +20,6 @@ repos:
     -   id: autoflake
         args: [
             --in-place,
-            --remove-all-unused-imports,
             --ignore-init-module-imports,
             --remove-unused-variables,
         ]
@@ -38,7 +37,5 @@ repos:
     -   id: ruff
         args: [
             --config=pyproject.toml,
-            --fix,
-            --max-line-length=120,
         ]
         exclude: .git|__pycache__
