@@ -2,16 +2,19 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from collections.abc import AsyncGenerator
+from collections.abc import (
+    AsyncGenerator,
+    Iterable,
+)
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from application.api.filters import PaginationIn
 from domain.entities.wallets import Transaction as TransactionEntity
 from infra.repositories.transactions.base import BaseTransactionRepository
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
-
 from logic.services.wallets import BaseWalletManagementService
 
 
@@ -21,7 +24,10 @@ class BaseTransactionService(ABC):
     async def create_transaction(self, transaction: TransactionEntity) -> TransactionEntity: ...
 
     @abstractmethod
-    async def get_transactions_list(self, wallet_oid: str, pagination: PaginationIn): ...
+    async def get_transactions_list(
+        self, wallet_oid: str,
+        pagination: PaginationIn,
+    ) -> Iterable[TransactionEntity]: ...
 
 
 @dataclass
@@ -54,7 +60,7 @@ class TransactionService(BaseTransactionService):
 
         return saved_transaction
 
-    async def get_transactions_list(self, wallet_oid: str, pagination: PaginationIn):
+    async def get_transactions_list(self, wallet_oid: str, pagination: PaginationIn) -> list[TransactionEntity]:
         async with self.get_session() as session:
             transactions = await self.transaction_repository.get_all(
                 session=session,
