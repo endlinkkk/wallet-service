@@ -19,3 +19,20 @@ class DatabaseManager:
     async def init_models(self):
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+
+
+class SessionManager:
+    def __init__(self, session_factory: async_sessionmaker):
+        self.session_factory = session_factory
+
+    async def __aenter__(self):
+        self.session: AsyncSession = self.session_factory()
+        return self.session
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            await self.session.rollback()
+            raise
+        else:
+            await self.session.commit()
+        await self.session.close()

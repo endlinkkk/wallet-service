@@ -2,24 +2,18 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from decimal import Decimal
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from domain.entities.wallets import (
     OperationType,
-)
-from domain.entities.wallets import (
     Transaction as TransactionEntity,
-)
-from domain.entities.wallets import (
     Wallet as WalletEntity,
 )
+from infra.database.manager import SessionManager
 from infra.repositories.wallets.base import BaseWalletRepository
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
-
 from logic.exceptions.wallets import (
     NotEnoughFundsException,
     WalletNotFoundException,
@@ -52,7 +46,9 @@ class WalletManagementService(BaseWalletManagementService):
     wallet_repository: BaseWalletRepository
 
     async def _has_sufficient_funds(self, transaction: TransactionEntity, session: AsyncSession):
-        wallet = await self._get_wallet_by_oid(wallet_oid=transaction.wallet_oid, session=session)
+        wallet = await self.wallet_repository.get_wallet_with_lock(wallet_oid=transaction.wallet_oid, session=session)
+        if wallet is None:
+            raise WalletNotFoundException()
         if transaction.operation_type == OperationType.WITHDRAW and wallet.balance < transaction.amount:
             raise NotEnoughFundsException()
 
@@ -75,25 +71,11 @@ class WalletManagementService(BaseWalletManagementService):
 
 @dataclass
 class WalletService(BaseWalletService):
-    session_factory: sessionmaker
+    session_manager: SessionManager
     wallet_repository: BaseWalletRepository
 
-    @asynccontextmanager
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        try:
-            session: AsyncSession = self.session_factory()
-            yield session
-            await session.commit()
-
-        except Exception:
-            await session.rollback()
-            raise
-
-        finally:
-            await session.close()
-
     async def get_wallet(self, wallet_oid: str) -> WalletEntity:
-        async with self.get_session() as session:
+        async with self.session_manager as session:
             wallet = await self.wallet_repository.get_by_oid(wallet_oid=wallet_oid, session=session)
             if wallet is None:
                 raise WalletNotFoundException()
@@ -101,7 +83,7 @@ class WalletService(BaseWalletService):
         return wallet
 
     async def create_wallet(self, wallet: WalletEntity) -> WalletEntity:
-        async with self.get_session() as session:
+        async with self.session_manager as session:
             wallet = await self.wallet_repository.add(wallet=wallet, session=session)
 
         return wallet

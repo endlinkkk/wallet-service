@@ -38,6 +38,7 @@ lint.ignore = ["E501", "I001", "S101", "F403", "PT023"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+extend-select = ["I"]
 
 [tool.isort]
 multi_line_output=3

@@ -1,10 +1,23 @@
 from dataclasses import dataclass
+from typing import Protocol
 
 from domain.entities.wallets import Transaction as TransactionEntity
 
-from logic.services.transactions import BaseTransactionService
+# from logic.services.transactions import BaseTransactionService
 from logic.use_cases.base import BaseUseCase
-from logic.validators.transactions import BaseTransactionValidatorService
+
+
+# from logic.validators.transactions import BaseTransactionValidatorService
+
+
+class BaseTransactionService(Protocol):
+    async def create_transaction(self, transaction: TransactionEntity) -> TransactionEntity:
+        pass
+
+
+class BaseTransactionValidatorService(Protocol):
+    def validate(self, transaction: TransactionEntity):
+        pass
 
 
 @dataclass

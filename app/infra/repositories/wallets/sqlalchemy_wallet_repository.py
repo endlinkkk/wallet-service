@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
-from domain.entities.wallets import Wallet as WalletEntity
 from sqlalchemy import (
     select,
     update,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from domain.entities.wallets import Wallet as WalletEntity
 from infra.database.models import WalletModel
 from infra.repositories.wallets.base import BaseWalletRepository
 
@@ -34,6 +34,12 @@ class SQLAlchemyWalletRepository(BaseWalletRepository):
                 balance=wallet_model.balance,
                 oid=wallet_model.oid,
             )
+
+    async def get_wallet_with_lock(self, wallet_oid: str, session: AsyncSession) -> WalletEntity | None:
+        result = await session.execute(
+                select(WalletModel).where(WalletModel.oid == wallet_oid).with_for_update(),
+        )
+        return result.scalar_one_or_none()
 
     async def add(self, wallet: WalletEntity, session: AsyncSession) -> WalletEntity:
         wallet_model = WalletModel(

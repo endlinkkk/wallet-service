@@ -1,16 +1,18 @@
 from functools import lru_cache
 
-from infra.database.manager import DatabaseManager
-from infra.repositories.transactions.base import BaseTransactionRepository
-from infra.repositories.transactions.sqlalchemy_transaction_repository import SQLAlchemyTransactionRepository
-from infra.repositories.wallets.base import BaseWalletRepository
-from infra.repositories.wallets.sqlalchemy_wallet_repository import SQLAlchemyWalletRepository
 from punq import (
     Container,
     Scope,
 )
-from settings.config import Settings
 
+from infra.database.manager import (
+    DatabaseManager,
+    SessionManager,
+)
+from infra.repositories.transactions.base import BaseTransactionRepository
+from infra.repositories.transactions.sqlalchemy_transaction_repository import SQLAlchemyTransactionRepository
+from infra.repositories.wallets.base import BaseWalletRepository
+from infra.repositories.wallets.sqlalchemy_wallet_repository import SQLAlchemyWalletRepository
 from logic.services.transactions import (
     BaseTransactionService,
     TransactionService,
@@ -31,6 +33,7 @@ from logic.validators.transactions import (
     TransactionAmountValidatorService,
     TransactionOperationTypeValidatorService,
 )
+from settings.config import Settings
 
 
 @lru_cache(1)
@@ -50,6 +53,8 @@ def _init_container() -> Container:
         scope=Scope.singleton,
     )
 
+    session_manager = SessionManager(session_factory=database_manager.SessionLocal)
+    container.register(SessionManager, instance=session_manager)
     ### Wallets
 
     # wallet repository
@@ -67,7 +72,7 @@ def _init_container() -> Container:
 
     def init_wallet_query_service() -> WalletService:
         return WalletService(
-            session_factory=database_manager.SessionLocal,
+            session_manager=container.resolve(SessionManager),
             wallet_repository=container.resolve(BaseWalletRepository),
         )
 
@@ -75,8 +80,16 @@ def _init_container() -> Container:
     container.register(BaseWalletService, factory=init_wallet_query_service)
 
     # wallet use cases
-    container.register(CreateWalletUseCase)
-    container.register(GetWalletUseCase)
+    def build_create_wallet_use_case() -> CreateWalletUseCase:
+        return CreateWalletUseCase(
+            wallet_service=container.resolve(BaseWalletService),
+        )
+    def build_get_wallet_use_case() -> GetWalletUseCase:
+        return GetWalletUseCase(
+            wallet_service=container.resolve(BaseWalletService),
+        )
+    container.register(CreateWalletUseCase, factory=build_create_wallet_use_case)
+    container.register(GetWalletUseCase, factory=build_get_wallet_use_case)
 
     ### Transactions
 
@@ -104,7 +117,7 @@ def _init_container() -> Container:
 
     def init_transaction_service() -> TransactionService:
         return TransactionService(
-            session_factory=database_manager.SessionLocal,
+            session_manager=container.resolve(SessionManager),
             transaction_repository=container.resolve(BaseTransactionRepository),
             wallet_manager_service=container.resolve(BaseWalletManagementService),
         )
@@ -112,7 +125,18 @@ def _init_container() -> Container:
     container.register(BaseTransactionService, factory=init_transaction_service)
 
     # transactions use cases
-    container.register(CreateTransactionUseCase)
-    container.register(GetTransactionsUseCase)
+    def build_create_transaction_use_case() -> CreateTransactionUseCase:
+        return CreateTransactionUseCase(
+            transaction_service=container.resolve(BaseTransactionService),
+            validator_service=container.resolve(BaseTransactionValidatorService),
+        )
+
+    def build_get_transaction_use_case() -> GetTransactionsUseCase:
+        return GetTransactionsUseCase(
+            transaction_service=container.resolve(BaseTransactionService),
+        )
+
+    container.register(CreateTransactionUseCase, factory=build_create_transaction_use_case)
+    container.register(GetTransactionsUseCase, factory=build_get_transaction_use_case)
 
     return container

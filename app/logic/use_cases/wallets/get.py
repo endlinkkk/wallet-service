@@ -1,10 +1,15 @@
 from dataclasses import dataclass
+from typing import Protocol
 
 from domain.entities.wallets import Wallet as WalletEntity
 
-from logic.services.wallets import BaseWalletService
+# from logic.services.wallets import BaseWalletService
 from logic.use_cases.base import BaseUseCase
 
+
+class BaseWalletService(Protocol):
+    async def get_wallet(self, wallet_oid: str) -> WalletEntity:
+        pass
 
 @dataclass
 class GetWalletUseCase(BaseUseCase):

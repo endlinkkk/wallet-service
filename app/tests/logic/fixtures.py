@@ -1,5 +1,6 @@
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
     AsyncSession,
     create_async_engine,
 )
@@ -26,6 +27,23 @@ class DatabaseManager:
             await conn.run_sync(Base.metadata.create_all)
 
 
+class SessionManager:
+    def __init__(self, session_factory: async_sessionmaker):
+        self.session_factory = session_factory
+
+    async def __aenter__(self):
+        self.session: AsyncSession = self.session_factory()
+        return self.session
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            await self.session.rollback()
+            raise
+        else:
+            await self.session.commit()
+        await self.session.close()
+
+
 @pytest_asyncio.fixture(scope="session")
 async def database_manager():
     database_url = "sqlite+aiosqlite:///:memory:"
@@ -36,7 +54,7 @@ async def database_manager():
 
 @pytest_asyncio.fixture(scope="session")
 async def wallet_service(database_manager: DatabaseManager) -> WalletService:
-    return WalletService(session_factory=database_manager.SessionLocal, wallet_repository=SQLAlchemyWalletRepository())
+    return WalletService(session_manager=SessionManager(database_manager.SessionLocal), wallet_repository=SQLAlchemyWalletRepository())
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -50,7 +68,7 @@ async def transaction_service(
     wallet_manager_service: WalletManagementService,
 ) -> TransactionService:
     return TransactionService(
-        session_factory=database_manager.SessionLocal,
+        session_manager=SessionManager(database_manager.SessionLocal),
         transaction_repository=SQLAlchemyTransactionRepository(),
         wallet_manager_service=wallet_manager_service,
     )
